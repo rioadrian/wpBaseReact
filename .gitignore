@@ -1,2 +1,7 @@
 .meteor/local
 .meteor/meteorite
+.DS_Store
+settings-development.json
+settings-production.json
+npm-debug.log
+node_modules
