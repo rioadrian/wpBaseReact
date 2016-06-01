@@ -8,7 +8,7 @@ import { Loading } from '/imports/ui/components/loading';
 
 const composer = (params, onData) => {
 	Session.set('queryProcess', true);
-	const subscription = Meteor.subscribe('adm.member.list', Session.get('queryLimit'));
+	const subscription = Meteor.subscribe('adm.member.list', Session.get('searchText'), Session.get('queryLimit'));
 	if (subscription.ready()){
 		Session.set('queryProcess', false);
 		const members = Member.find().fetch();

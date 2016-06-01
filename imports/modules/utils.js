@@ -11,6 +11,18 @@ export const toggleNav = () => {
 
 export const handleLogout = () => Meteor.logout(() => browserHistory.push('/'));
 
+export const handleSearch = (event) => {
+  const searchQuery = event.target.value.trim();
+  if (searchQuery !== '' && event.keyCode === 13) {
+    console.log('searchQuery:', searchQuery);
+  }
+};
+
+export const searchButtonClicked = (event) => {
+	event.preventDefault();
+	handleSearch(event)
+};
+
 export const resetInputValue = (component) => {
 	ReactDOM.findDOMNode(component).blur()
 	ReactDOM.findDOMNode(component).value= '';
@@ -47,9 +59,10 @@ export const infiniteScroll = () => {
   );
 };
 
-export const initInfiniteScroll = (methodCountName) => {
+export const initInfiniteScroll = (methodCountName, searchText) => {
 	resetQueryLimit();
-	Meteor.call(methodCountName, null, function(error, result){
+	Session.set('methodCountName', methodCountName);
+	Meteor.call(methodCountName, {searchText:searchText}, function(error, result){
 		if(!error){
 			Session.set('queryMax', result);	
 			if(Session.get('queryLimit') < Session.get('queryMax')){
@@ -62,3 +75,4 @@ export const initInfiniteScroll = (methodCountName) => {
 	});
 };
 	
+

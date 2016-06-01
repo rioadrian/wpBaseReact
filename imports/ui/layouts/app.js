@@ -15,7 +15,7 @@ export const App = React.createClass({
 
     return <div>
       <AppNavigation />
-      <Grid>
+      <Grid className="fixedTopCompensate">
         <PageNavigation routeName = { this.props.routes[this.props.routes.length-1].name } params = { this.props.params }/>
         { this.props.children }
         <QueryNavigation />

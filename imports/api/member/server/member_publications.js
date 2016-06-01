@@ -1,13 +1,15 @@
 import { Meteor } from 'meteor/meteor';
-import { Member } from '/imports/api/member/member_collection.js';
-import { Organization } from '/imports/api/organization/organization_collection.js';
-import { Acct } from '/imports/api/acct/acct_collection.js';
+import { Member } from '/imports/api/member/member_collection';
+import { Organization } from '/imports/api/organization/organization_collection';
+import { Acct } from '/imports/api/acct/acct_collection';
+
+import { constructQuery } from '/imports/api/member/server/member_methods';
 
 //all publications for own account
 Meteor.publishComposite('my.detail', function myDetail(){
   return {
     find() {
-    	
+      
       const query = {
         _id: this.userId,
       };
@@ -24,7 +26,7 @@ Meteor.publishComposite('my.detail', function myDetail(){
         return Organization.find({ _id: member.organizationId }, { fields: Organization.publicFields });
       },
     },{
-    	find(member) {
+      find(member) {
         return Acct.find({ ownerId: member._id }, { fields: Acct.publicFields });
       },
     }],
@@ -90,13 +92,22 @@ Meteor.publishComposite('adm.member.detail', function admMemberDetail(memberId) 
     };
 });
 
-Meteor.publishComposite('adm.member.list', function admMemberList(limit) {
+Meteor.publishComposite('adm.member.list', function admMemberList(searchText, limit) {
+  check(searchText, Match.Maybe(Match.textOnly));
   check(limit, Number);
 
   if( Roles.userIsInRole(this.userId,'Admin','domain.com') )
     return {
       find() {
-        return Member.find({},{limit: limit});
+        
+        // Meteor._sleepForMs(1000);
+        const query = constructQuery(searchText);
+
+        const options = {
+          limit: limit
+        };
+
+        return Member.find(query,options);
       },
 
       children: [{
