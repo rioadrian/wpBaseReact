@@ -2,13 +2,9 @@ import React from 'react';
 import { Table, Alert } from 'react-bootstrap';
 import { NotFound } from '/imports/ui/pages/not-found';
 
-import { infiniteScroll, renderLoadingState } from '/imports/modules/utils';
-
 import { AdmMemberItem } from './AdmMemberItem.js';
 
 export const AdmMemberList = ({ members, hasUser }) => {
-	infiniteScroll();
-	
 	if(hasUser)
 		return (
 		  members.length > 0 ? <div>
@@ -27,8 +23,6 @@ export const AdmMemberList = ({ members, hasUser }) => {
 						))}
 					</tbody>
 			  </Table>
-
-			  { renderLoadingState() }
 		  </div> :
 			  <Alert bsStyle="warning">No Member yet.</Alert>
 		);

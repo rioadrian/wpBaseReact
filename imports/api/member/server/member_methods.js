@@ -35,13 +35,38 @@ export const createMember = new ValidatedMethod({
 
 export const admMemberListCount = new ValidatedMethod({
   name: 'adm.member.list.count',
-  validate: null,
-  
-  run() {
-    if( Roles.userIsInRole(this.userId,'Admin','domain.com') )
-      return Member.find().count();
+  validate: new SimpleSchema({
+    searchText: { type: String, optional: true }
+  }).validator(),
+
+  run({searchText}) {
+    if( Roles.userIsInRole(this.userId,'Admin','domain.com') ){
+
+      const query = constructQuery(searchText);
+
+      return Member.find(query).count();
+    }
     else
       return 0;
   }
 
 });
+
+export const constructQuery = (searchText) => {
+  let query = {};
+  let mongoDbArr = [];
+        
+  if(searchText){
+    // already filtered in Match aboved searchText = searchText.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
+
+    mongoDbArr.push({fullname: { $regex : searchText, $options:"i" } });
+    mongoDbArr.push({nickname: { $regex : searchText, $options:"i" } });
+    mongoDbArr.push({type: { $regex : searchText, $options:"i" } });
+    mongoDbArr.push({status: { $regex : searchText, $options:"i" } });
+    
+    query = { $or: mongoDbArr };
+  };
+
+  return query;
+};
+

@@ -7,16 +7,14 @@ import { AdmMemberList } from '/imports/ui/components/adm/member/AdmMemberList';
 import { Loading } from '/imports/ui/components/loading';
 
 const composer = (params, onData) => {
-	console.log('di dalam composer');
-	
-	const subscription = Meteor.subscribe('adm.member.list', Session.get('queryLimit'));
+	Session.set('queryProcess', true);
+	const subscription = Meteor.subscribe('adm.member.list', Session.get('searchText'), Session.get('queryLimit'));
 	if (subscription.ready()){
-		Meteor.call('adm.member.list.count', null, function(error, result){
-			if(!error)
-				Session.set('queryMax', result);
-		});
-
+		Session.set('queryProcess', false);
 		const members = Member.find().fetch();
+		if(Session.get('queryMax') <= members.length)
+			Session.set('queryInfinite', false);
+		
 		onData(null, { 
 			members: members,
 			hasUser: Meteor.user()

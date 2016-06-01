@@ -3,6 +3,11 @@ Match._id = Match.Where(id => {
   return /^[a-zA-Z0-9]{17,17}/.test(id); 
 });
 
+Match.textOnly = Match.Where(text => {
+  check(text, String);
+  return /^[a-zA-Z0-9]/.test(text); 
+});
+
 // BrowserPolicy.content.allowOriginForAll('blob:');
 
 //   var trusted = [

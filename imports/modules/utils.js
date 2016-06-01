@@ -11,6 +11,18 @@ export const toggleNav = () => {
 
 export const handleLogout = () => Meteor.logout(() => browserHistory.push('/'));
 
+export const handleSearch = (event) => {
+  const searchQuery = event.target.value.trim();
+  if (searchQuery !== '' && event.keyCode === 13) {
+    console.log('searchQuery:', searchQuery);
+  }
+};
+
+export const searchButtonClicked = (event) => {
+	event.preventDefault();
+	handleSearch(event)
+};
+
 export const resetInputValue = (component) => {
 	ReactDOM.findDOMNode(component).blur()
 	ReactDOM.findDOMNode(component).value= '';
@@ -18,45 +30,49 @@ export const resetInputValue = (component) => {
 
 export const goLink = (path) => browserHistory.push(path);
 
-export const renderLoadingState = () => {
+export const resetQueryLimit = () => {
+  Session.set('queryLimit', 25);
+  if(Meteor.settings.public.queryLimit)
+    Session.set('queryLimit', Meteor.settings.public.queryLimit);
 
-	// if(Session.get('queryLimit') < Session.get('queryMax')) 
-	// 	return <Loading />;
-	
-	if(Session.get('queryInfinite')){
-		if(Session.get('queryProcess'))
-			return <Loading />;
-		else
-			return 'load more...';
-	}
+  Session.set('queryStep', 25);
+  if(Meteor.settings.public.queryStep)
+    Session.set('queryStep', Meteor.settings.public.queryStep);
+};
 
-	return '';	
+export const nextQueryLimit = () => {
+	const nextQueryLimit = Session.get('queryLimit')+Session.get('queryStep');
+	Session.set('queryLimit', nextQueryLimit < Session.get('queryMax') ? nextQueryLimit : Session.get('queryMax'));
 };
 
 export const infiniteScroll = () => {
-  if(Session.get('queryInfinite')){
+  $(window).scroll(
+    _.throttle(function() {
+      if(
+      	Session.get('queryInfinite') && 
+      	!Session.get('queryProcess') && 
+      	($(window).scrollTop() + $(window).height() > $(document).height() - 100)
+      ){
+      	nextQueryLimit();
+      }
+    }, 500)
+  );
+};
 
-	  $(window).scroll(
-	    _.throttle(function() {
-	      
-	      	if ($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
-		        // self.props.incrementLimit();          
-		        if(Session.get('queryLimit') < Session.get('queryMax')){
-		          console.log('lanjut');
-		          Session.set('queryLimit', Session.get('queryLimit')+Session.get('queryStep'));
-		          Session.set('queryProcess', true);
-		        }
-		        else{
-		        	console.log('harusnya selesai');
-		          Session.set('queryLimit', Session.get('queryMax'));
-		          Session.set('queryProcess', false);
-		          Session.set('queryInfinite', false);
-		        }
-	      	}
-	      
-	    }, 1000)
+export const initInfiniteScroll = (methodCountName, searchText) => {
+	resetQueryLimit();
+	Session.set('methodCountName', methodCountName);
+	Meteor.call(methodCountName, {searchText:searchText}, function(error, result){
+		if(!error){
+			Session.set('queryMax', result);	
+			if(Session.get('queryLimit') < Session.get('queryMax')){
+				Session.set('queryInfinite', true);
+				infiniteScroll();
+			}else{
+				Session.set('queryLimit', result);
+			};
+		};
+	});
+};
+	
 
-	  );
-	};
-
-}

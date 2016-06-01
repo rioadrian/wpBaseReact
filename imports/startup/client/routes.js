@@ -34,16 +34,6 @@ const requireAuth = (nextState, replace) => {
 };
 
 Meteor.startup(() => {
-  Session.set('queryLimit', 25);
-  if(Meteor.settings.public.queryLimit)
-    Session.set('queryLimit', Meteor.settings.public.queryLimit);
-  console.log('Session.get(queryLimit)',Session.get('queryLimit'));
-
-  Session.set('queryStep', 25);
-  if(Meteor.settings.public.queryStep)
-    Session.set('queryStep', Meteor.settings.public.queryStep);
-  console.log('Session.get(queryStep)',Session.get('queryStep'));
-
   render(
     <Router history={ browserHistory }>
       <Route path="/" component={ App }>
